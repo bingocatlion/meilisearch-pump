@@ -26,10 +26,6 @@ use tracing::level_filters::LevelFilter;
 use tracing_subscriber::layer::SubscriberExt as _;
 use tracing_subscriber::Layer;
 
-#[cfg(not(windows))]
-#[global_allocator]
-static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
-
 fn default_log_route_layer() -> LogRouteType {
     None.with_filter(tracing_subscriber::filter::Targets::new().with_target("", LevelFilter::OFF))
 }
@@ -77,7 +73,7 @@ fn on_panic(info: &std::panic::PanicHookInfo) {
 
 pub fn try_alone_run(config_path:&str) -> anyhow::Result<()> {
     let config = config_path.to_string();
-    actix_rt::System::new().block_on(async {
+    actix_web::rt::System::new().block_on(async {
         try_main(config).await.inspect_err(|error| {
             tracing::error!(%error);
             let mut current = error.source();
@@ -338,11 +334,3 @@ fn generated_master_key_message() -> String {
     )
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    pub fn test_alone_server() {
-        try_alone_run("/Users/tianlan/Documents/zoos/pump/meilisearch/config.toml");
-    }
-}

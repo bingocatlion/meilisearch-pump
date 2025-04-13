@@ -12,13 +12,9 @@ license.workspace = true
 
 default-run = "meilisearch"
 
-[lib]
-name = "meilisearch"
-crate-type = ["cdylib"]  # 动态库（跨语言兼容）
-
-[[bin]]
-name = "meilisearch"
-path = "src/main.rs"  # 可执行文件入口
+[[test]]
+name = "alone"  # 应该对应 tests/alone.rs
+path = "tests/alone.rs"  # 确保路径正确
 
 [dependencies]
 actix-cors = "0.7.0"

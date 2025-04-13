@@ -11,7 +11,6 @@ use std::{env, fmt, fs};
 
 use byte_unit::{Byte, ParseError, UnitType};
 use clap::Parser;
-use prometheus::Opts;
 use meilisearch_types::features::InstanceTogglableFeatures;
 use meilisearch_types::milli::update::IndexerConfig;
 use meilisearch_types::milli::ThreadPoolNoAbortBuilder;
