@@ -11,6 +11,7 @@ use std::{env, fmt, fs};
 
 use byte_unit::{Byte, ParseError, UnitType};
 use clap::Parser;
+use prometheus::Opts;
 use meilisearch_types::features::InstanceTogglableFeatures;
 use meilisearch_types::milli::update::IndexerConfig;
 use meilisearch_types::milli::ThreadPoolNoAbortBuilder;
@@ -471,6 +472,35 @@ impl Opt {
         !self.no_analytics
     }
 
+    pub fn try_from_config_build(user_specified_config_file_path:&str) -> anyhow::Result<(Self, Option<PathBuf>)> {
+        let mut config_read_from = None;
+        let config_file_path = PathBuf::from(user_specified_config_file_path);
+        match std::fs::read_to_string(&config_file_path) {
+            Ok(config) => {
+                // If the file is successfully read, we deserialize it with `toml`.
+                let opt_from_config = toml::from_str::<Opt>(&config)?;
+                // Return an error if config file contains 'config_file_path'
+                // Using that key in the config file doesn't make sense bc it creates a logical loop (config file referencing itself)
+                if opt_from_config.config_file_path.is_some() {
+                    anyhow::bail!("`config_file_path` is not supported in the configuration file")
+                }
+                // We inject the values from the toml in the corresponding env vars if needs be. Doing so, we respect the priority toml < env vars < cli args.
+                opt_from_config.export_to_env();
+                // Once injected we parse the cli args once again to take the new env vars into scope.
+                let opts = Opt::parse();
+                config_read_from = Some(config_file_path);
+                Ok((opts, config_read_from))
+            }
+            Err(e) => {
+                // If we have an error while reading the file defined by the user.
+                anyhow::bail!(
+                        "unable to open or read the {:?} configuration file: {}.",
+                        user_specified_config_file_path,
+                        e,
+                    )
+            }
+        }
+    }
     /// Build a new Opt from config file, env vars and cli args.
     pub fn try_build() -> anyhow::Result<(Self, Option<PathBuf>)> {
         // Parse the args to get the config_file_path.

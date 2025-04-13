@@ -12,6 +12,14 @@ license.workspace = true
 
 default-run = "meilisearch"
 
+[lib]
+name = "meilisearch"
+crate-type = ["cdylib"]  # 动态库（跨语言兼容）
+
+[[bin]]
+name = "meilisearch"
+path = "src/main.rs"  # 可执行文件入口
+
 [dependencies]
 actix-cors = "0.7.0"
 actix-http = { version = "3.9.0", default-features = false, features = [
