@@ -71,10 +71,9 @@ fn on_panic(info: &std::panic::PanicHookInfo) {
     tracing::error!(%info);
 }
 
-pub fn try_alone_run(config_path:&str) -> anyhow::Result<()> {
-    let config = config_path.to_string();
+pub fn try_alone_run(config_path:String) -> anyhow::Result<()> {
     actix_web::rt::System::new().block_on(async {
-        try_main(config).await.inspect_err(|error| {
+        try_main(config_path).await.inspect_err(|error| {
             tracing::error!(%error);
             let mut current = error.source();
             let mut depth = 0;

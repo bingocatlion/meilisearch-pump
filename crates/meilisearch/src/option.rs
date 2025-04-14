@@ -484,11 +484,11 @@ impl Opt {
                     anyhow::bail!("`config_file_path` is not supported in the configuration file")
                 }
                 // We inject the values from the toml in the corresponding env vars if needs be. Doing so, we respect the priority toml < env vars < cli args.
-                opt_from_config.export_to_env();
+                // opt_from_config.export_to_env();
                 // Once injected we parse the cli args once again to take the new env vars into scope.
-                let opts = Opt::parse();
+                //let opts = Opt::parse();
                 config_read_from = Some(config_file_path);
-                Ok((opts, config_read_from))
+                Ok((opt_from_config, config_read_from))
             }
             Err(e) => {
                 // If we have an error while reading the file defined by the user.
